@@ -33,6 +33,16 @@ char *hostname() {
     return hostname;
 }
 
+char *getShell() {
+    char *shell = getenv("SHELL");
+    return shell;
+}
+
+char *getTerm() {
+    char *term = getenv("TERM");
+    return term; // im starting to see a pattern here....
+}
+
 char *osRelease() {
     static char buffer[255];
     FILE *pOsReleaseFile = fopen("/etc/os-release", "r"); // pointer to read /etc/os-release, where we can find the name of the distro
@@ -45,7 +55,9 @@ char *osRelease() {
 
 int main() {
     printf("%s@%s\n", getlogin(), hostname());
-    printf("os   %s\n", osRelease());
-    printf("wm   %s\n", getDesktop());
+    printf("os    %s\n", osRelease());
+    printf("wm    %s\n", getDesktop());
+    printf("sh    %s\n", getShell());
+    printf("term  %s\n", getTerm());
     return 0;
 }
