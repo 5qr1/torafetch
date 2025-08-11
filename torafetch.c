@@ -1,63 +1,47 @@
-// linux only
+// this project only includes support for the OpenBSD operating system
+// the reason for this is because this project was intended as "an introductory to C" than something i want to spend more than a day on
+// which would have been the case if i continued with the plan of supporting every linux distro and bsd variant with colored logos
 
+// this will probably change in the future, but i have no desire to "finish" this project as of now
+ 
 #include <stdio.h>
 #include <sys/utsname.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-char *strrev(char *str) { // strrev isnt included in c?
-    if (str == NULL) return NULL; // if the string is nothing return NULL
-    size_t len = strlen(str); // check the length of string
-    if (len == 0) return str; // if its 0 return string (nothing to reverse)
-    char *start = str; // first letter
-    char *end = str + len - 1; // last letter
-    while (start < end) {
-        char temp = *start; // saves start
-        *start = *end; // makes start end
-        *end = temp; // makes end start
-        start++; // repeats onto next character
-        end--;
-    }
-    return str;
-}
-
-char *getDesktop() {
-    char *wm = getenv("XDG_CURRENT_DESKTOP");
-    return wm;
-}
-
-char *hostname() {
-    static char hostname[255]; // static so it stays after the function ends
+const char *hostname() {
+    static char hostname[255];
     gethostname(hostname, sizeof(hostname));
     return hostname;
 }
 
-char *getShell() {
+const char *getDesktop() {
+    char *wm = getenv("XDG_CURRENT_DESKTOP"); 
+    if(wm == NULL) return "unkown";
+    return wm;
+}
+
+const char *getShell() {
     char *shell = getenv("SHELL");
+    if(shell == NULL) return "unkown";
     return shell;
 }
 
-char *getTerm() {
+const char *getTerm() {
     char *term = getenv("TERM");
+    if(term == NULL) return "unkown";
     return term; // im starting to see a pattern here....
 }
 
-char *osRelease() {
-    static char buffer[255];
-    FILE *pOsReleaseFile = fopen("/etc/os-release", "r"); // pointer to read /etc/os-release, where we can find the name of the distro
-    fgets(buffer, 255, pOsReleaseFile); // reads the top line of /etc/os-release
-    char *parsedBuffer = buffer + 6;
-    char *moreParsedBuffer = strrev(parsedBuffer) + 2;  // this is a bad way of doing things lol
-    return strrev(moreParsedBuffer);
-    fclose(pOsReleaseFile); // closes the file
-}
-
 int main() {
-    printf("%s@%s\n", getlogin(), hostname());
-    printf("os    %s\n", osRelease());
-    printf("wm    %s\n", getDesktop());
-    printf("sh    %s\n", getShell());
-    printf("term  %s\n", getTerm());
-    return 0;
+    struct utsname uts;
+    uname(&uts);
+    printf("\033[33m      _____     \033[0m %s@%s\n",  getlogin(), hostname());
+    printf("\033[33m    \\-     -/\033[0m  \033[33m  os    \033[0m%s\n", uts.sysname);
+    printf("\033[33m \\_/         \\\033[0m  \033[33m sh    \033[0m%s\n", getShell());
+    printf("\033[33m |        \033[36m0\033[33m \033[36m0\033[33m |\033[0m  \033[33mwm  \033[0m  %s\n", getDesktop());
+    printf("\033[33m |_  <   )  3 )\033[0m  \033[33mterm  \033[0m%s\n", getTerm());
+    printf("\033[33m / \\         /\033[0m\n");
+    printf("\033[33m    /-_____-\\\n \033[0m");
 }
